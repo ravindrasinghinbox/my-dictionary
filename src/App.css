@@ -1,0 +1,108 @@
+#root,.App{
+  height: inherit;
+}
+html {
+  width: 100%;
+  height: 100%;
+}
+body {
+  padding-bottom: 54px;
+  margin: 0;
+  height: inherit;
+}
+
+*::-webkit-scrollbar {
+  width: 0em;
+}
+*:hover::-webkit-scrollbar {
+  width: 0.2em;
+}
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
+* {
+  box-sizing: border-box !important;
+}
+.list {
+  display: inline-block;
+  padding: 8px;
+  min-width: 250px;
+  width: 20%;
+  height: inherit;
+  overflow: auto;
+  background: #f3f3f3;
+  border: 5px solid white;
+  border-right: 0px;
+}
+.list:last-child {
+  border: 5px solid white;
+}
+.list ul {
+  border-left: 1px solid #5f5f5f;
+}
+.list span {
+  font-size: 0.75rem;
+}
+.list .word {
+  text-transform: capitalize;
+}
+.list li {
+  white-space: normal;
+}
+.interim_span {
+  color: gray;
+}
+.final_span {
+  color: black;
+  text-transform: capitalize;
+  padding-right: 3px;
+}
+.result {
+  height: inherit;
+  background-color: whitesmoke;
+  overflow-y: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+.result:empty::before {
+  cursor: pointer;
+  content: "Click to Speak";
+  position: absolute;
+  top: 50%;
+  margin-top: -5vw;
+  left: 0;
+  text-align: center;
+  width: 100%;
+  font-size: 10vw;
+}
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: #f3f3f3;
+  padding: 0px 8px;
+}
+.header span {
+  line-height: 50px;
+}
+.float-right {
+  float: right;
+}
+.float-left {
+  float: left;
+}
+#voice-list {
+  width: 100px;
+  background-color: transparent;
+}
+select#voice-list:empty {
+  display: none;
+}
