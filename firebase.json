@@ -4,6 +4,6 @@
   },
   "hosting": {
     "site": "own-dictionary",
-    "public": "/"
+    "public": "build/"
   }
 }
