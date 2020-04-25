@@ -37,6 +37,7 @@ class App extends React.Component {
 
     this.loadDictionary()
     this.listen = this.listen.bind(this)
+    this.stopListen = this.stopListen.bind(this)
 
     /**
      * Events
@@ -177,7 +178,7 @@ class App extends React.Component {
    * @param {event} event 
    */
   onEnd(event) {
-    this.listen()
+    // this.listen()
     this.setState({
       events: {
         isStart: false
@@ -215,7 +216,10 @@ class App extends React.Component {
     } else {
       this.setState({ interimResult: str })
     }
-    this.getLastWordMeaning(str)
+    // Not allow to twice speak
+    if (this.state.meaning.word !== str) {
+      this.getLastWordMeaning(str)
+    }
   }
 
   getLastWordMeaning(str) {
@@ -242,7 +246,7 @@ class App extends React.Component {
       })
       this.speak(word)
     } else {
-      this.speak('Not found! '+word)
+      this.speak(word+' not found!')
       console.log('Not found meaning of ', word)
     }
   }
@@ -257,8 +261,11 @@ class App extends React.Component {
       console.log('Recognition already in on', this.state.currentEvent)
     }
   }
+  stopListen() {
+    this.state.recognition.stop()
+  }
   speak(text) {
-    this.state.speechSynthesisUtterance['text'] = text || this.state.speechSynthesisUtterance['text']
+    if(text) this.state.speechSynthesisUtterance['text'] = text
     window.speechSynthesis.cancel()
     window.speechSynthesis.speak(this.state.speechSynthesisUtterance)
   }
@@ -284,15 +291,15 @@ class App extends React.Component {
             <div className="list">
               <span>{key}</span>
               <ul>
-                {Object.keys(this.state.meaning.defination[key]).map(key2 =>
-                  <li key={'w'.key2}>{this.state.meaning.defination[key][key2]}</li>
+                {Object.keys(this.state.meaning.defination[key]).map((key2,index) =>
+                  <li key={index}>{this.state.meaning.defination[key][key2]}</li>
                 )}
               </ul>
             </div>
           )}
         </section>
-        <nav className="navbar navbar-expand-md fixed-bottom">
-          <Button variant="default" disabled>
+        <nav className="navbar fixed-bottom">
+          <Button  variant="default" disabled>
             <Spinner
               as="span"
               animation="grow"
@@ -302,11 +309,11 @@ class App extends React.Component {
               aria-hidden="true"
             />
           </Button>
-          <div>{this.state.interimResult.split(' ').map(key =>
-            <button onClick={this.showMeaning.bind(this, key)} className={`ml-1 btn btn-sm btn-outline-danger ${this.state.meaning.word === key?'active':''}`}>{key}</button>
+          <div className="wordList">{this.state.interimResult.split(' ').map((key,index) =>
+            <button key={index} onClick={this.showMeaning.bind(this, key)} className={`mr-1 btn  btn-outline-danger ${key?'':'d-none'} ${this.state.meaning.word === key?'active':''}`}>{key}</button>
           )}</div>
-          <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className="ml-auto btn-sm" variant="primary">
-            {this.state.events.isStart ? 'Stop' : 'Start'}
+          <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className="ml-auto " variant="primary">
+            {this.state.events.isStart ? 'Stop' : 'Start Listen'}
           </Button>
         </nav>
       </div>
