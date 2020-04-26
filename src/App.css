@@ -8,7 +8,7 @@ html {
   height: 100%;
 }
 body {
-  padding-bottom: 47px;
+  padding-bottom: 64px;
   margin: 0;
   height: inherit;
 }
@@ -39,12 +39,12 @@ body {
   width: 20%;
   height: inherit;
   overflow: overlay;
-  border: 1px dashed white;
+  border: 5px solid white;
   border-bottom: none;
   border-right: none;
 }
 .list:last-child {
-  border-right: 1px dashed white;
+  border-right: 5px solid white;
 }
 .list ul {
   border-left: none;
@@ -101,13 +101,20 @@ select#voice-list:empty {
 }
 .fixed-bottom {
   padding: 4px !important;
-  border-top: 1px dashed white;
+  height: 64px;
+  border-top: 5px solid white;
   background-color: whitesmoke !important;
 }
 .wordList {
-  display: inline-block;
-  width: calc(100% - 150px);
+  position: absolute;
+  top: -32px;
+  width: 100%;
   padding: 4px;
   overflow: overlay;
   white-space: pre;
+  height: 32px;
+}
+.listen-btn{
+  border-radius: 100%;
+  letter-spacing: 1px;
 }
