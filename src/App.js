@@ -417,6 +417,9 @@ class App extends React.Component {
   speakInHi(text) {
     this.speak(text, 'hi-IN')
   }
+  speakInEn(text) {
+    this.speak(text, 'en-IN')
+  }
   render() {
     return (
       <div className="App">
@@ -459,7 +462,7 @@ class App extends React.Component {
           <div className="wordList">
             {/* dictionary words */}
             {Object.keys(this.state.meaning.predict).map((key, index) =>
-              <Badge key={index} onClick={this.showMeaning.bind(this, key)} className={`mr-1 btn btn-sm  btn-dark ${key ? '' : 'd-none'} ${this.state.meaning.word === key ? 'active' : ''}`}>{key}</Badge>
+              <Badge key={index} onClick={this.speakInEn.bind(this, key)} className={`mr-1 btn btn-sm  btn-dark ${key ? '' : 'd-none'} ${this.state.meaning.word === key ? 'active' : ''}`}>{key}</Badge>
             )}
             {/* final words */}
             {this.state.finalResult.split(' ').map((key, index) =>
