@@ -1,11 +1,14 @@
 import React from 'react'
-import { Button, Spinner, Badge } from 'react-bootstrap'
+import { Button, Spinner, Badge, ListGroup, ButtonGroup } from 'react-bootstrap'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faVolumeUp } from '@fortawesome/free-solid-svg-icons'
+
 import './App.css'
 const axios = require('axios')
-
 class App extends React.Component {
   state = {
     DICT: [],
+    DICT_HISTORY: [],
     meaning: {
       word: "",
       predict: {},
@@ -13,8 +16,7 @@ class App extends React.Component {
     },
     SpeechRecognition: undefined,
     SpeechRecognitionEvent: undefined,
-    speechSynthesisUtterance: undefined,
-    colors: undefined,
+    speakLangAllowed: ['hi-IN', 'en-IN', 'en-US', 'en-UK'],
     grammar: undefined,
     voiceList: undefined,
     recognition: undefined,
@@ -30,13 +32,10 @@ class App extends React.Component {
 
     this.state.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
     this.state.SpeechRecognitionEvent = window.webkitSpeechRecognitionEvent || window.SpeechRecognitionEvent
-    this.state.speechSynthesisUtterance = new window.SpeechSynthesisUtterance("")
     this.state.recognition = new this.state.SpeechRecognition()
     this.state.recognition.continuous = true
     this.state.recognition.interimResults = true
-    this.state.recognition.lang = 'en-US'
 
-    this.loadDictionary()
     this.listen = this.listen.bind(this)
     this.stopListen = this.stopListen.bind(this)
 
@@ -77,6 +76,11 @@ class App extends React.Component {
     this.state.recognition.onstart = this.onStart
   }
 
+  componentDidMount() {
+
+    this.loadDictionary()
+    this.loadDictionaryHistory()
+  }
   /**
    * On Start
    * @param {event} event 
@@ -252,6 +256,7 @@ class App extends React.Component {
         }
       })
       this.speak(word)
+      this.speakDefination();
     } else {
       this.speak(word + ' not found!')
       console.log('Not found meaning of ', word)
@@ -294,14 +299,16 @@ class App extends React.Component {
   stopListen() {
     this.state.recognition.stop()
   }
-  speak(text) {
-    window.speechSynthesis.cancel()
+  speak(text, lang = 'en-IN', clear = true) {
+    if (clear) {
+      window.speechSynthesis.cancel()
+    }
     if (text) {
-      this.setState((state) => {
-        state.speechSynthesisUtterance['text'] = text
-      }, () => {
-        window.speechSynthesis.speak(this.state.speechSynthesisUtterance)
-      })
+      var speechSynthesisUtterance = new window.SpeechSynthesisUtterance(text)
+      if (this.state.speakLangAllowed.includes(lang)) {
+        speechSynthesisUtterance['lang'] = lang
+      }
+      window.speechSynthesis.speak(speechSynthesisUtterance)
     }
   }
   /**
@@ -318,10 +325,125 @@ class App extends React.Component {
         console.log(error)
       })
   }
+
+  /**
+   * Get local data from localhost
+   * 
+   * @param {string} key 
+   */
+  getLocalData(key) {
+    var result = null
+    var data = localStorage.getItem(key)
+    try {
+      if (data) {
+        result = JSON.parse(data)
+      }
+    } catch (e) {
+      console.log('Error occur durning parse json', e);
+    }
+    return result
+  }
+
+  /**
+   * Set Local Data
+   * 
+   * @param {string} key 
+   * @param {string} data 
+   */
+  setLocalData(key, data) {
+    localStorage.setItem(key, JSON.stringify(data))
+  }
+  /**
+   * Load Dictionary
+   */
+  loadDictionaryHistory() {
+    let data = [
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
+      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 }
+    ]
+    var list = [
+      data, data, data, data, data, data, data, data, data, data
+    ]
+    // data = this.getLocalData('DICT_HISTORY') || list
+    data = list
+    if (data) {
+      this.setState({ DICT_HISTORY: data })
+    }
+  }
+
+  /**
+   * Suffle word
+   * 
+   * @param {string} str 
+   */
+  suffle(str, join = true) {
+    str = str.split('').sort(() => (Math.random() - 0.5));
+    if (join) str = str.join('')
+    return str;
+  }
+  speakDefination() {
+    var meaning = this.state.meaning.defination;
+    var note = '';
+    for (var g in meaning) {
+      note += `${g}|`;
+      for (var i = 0; i < 3; i++) {
+        var word = meaning[g][i]
+        if (word && word.trim()) {
+          note += `${meaning[g][i]},`
+        }
+      }
+    }
+    note += " आदि को निम्नलिखित रूपों में प्रयोग कर सकते है|";
+    var text = `${this.state.meaning.word} ${note} `;
+    this.speakInHi(text)
+  }
+  speakInUK() {
+    this.speak(this.state.meaning.word, 'en-UK')
+  }
+  speakInUS() {
+    this.speak(this.state.meaning.word, 'en-US')
+  }
+  speakInHi(text) {
+    this.speak(text, 'hi-IN')
+  }
   render() {
     return (
       <div className="App">
         <section className="result">
+          {this.state.DICT_HISTORY.map((day, index) => (
+            <div key={index} className={`list ${this.state.meaning.word ? 'd-none' : ''}`}>
+              <div className="text-center">{index ? 'Day-' + index : 'Today'}</div>
+              {
+                day.map((obj, i2) => (
+                  <ListGroup.Item key={i2}>
+                    <div className="row">
+                      <div className="col-10">{obj.meaning}</div>
+                      <div className="col-2 text-right"><Badge variant="light">?</Badge></div>
+                      <div className="col-10">
+                        {
+                          obj.word.split('').sort(() => (Math.random() - 0.5)).map((letter, i3) =>
+                            <Badge key={i3} variant="warning" className="mr-1">{letter}</Badge>
+                          )
+                        }
+                      </div>
+                      <div className="col-2 text-right ok-img"><Badge variant="danger"></Badge></div>
+                    </div>
+                  </ListGroup.Item>
+                ))
+              }
+            </div>
+          ))}
           {Object.keys(this.state.meaning.defination).map((key, index) =>
             <div key={index} className="list">
               <span>{key}</span>
@@ -348,16 +470,21 @@ class App extends React.Component {
               <Badge key={index} onClick={this.showMeaning.bind(this, key)} className={`mr-1 btn btn-sm btn-outline-warning ${key ? '' : 'd-none'}`}>{key}</Badge>
             )}
           </div>
-          <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className={`m-auto listen-btn btn-lg ${this.state.events.isStart ? 'btn-danger' : 'btn-primary'}`} >
-            <Spinner
-              as="span"
-              animation="grow"
-              size="sm"
-              variant="light"
-              role="status"
-              aria-hidden="true"
-            /> {this.state.events.isStart ? 'PAUSE' : 'START'}
-          </Button>
+          <ButtonGroup size="lg" className="mb-2 m-auto">
+            <Button onClick={this.speakInUK.bind(this)} size="lg" className="disabled" variant="outline-primary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> UK</Button>
+            <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className={`listen-btn`} size="lg" variant="primary" >
+              <Spinner
+                as="span"
+                animation="grow"
+                size="sm"
+                variant="light"
+                role="status"
+                aria-hidden="true"
+              /> {this.state.events.isStart ? 'PAUSE' : 'LISTEN'}
+            </Button>
+            <Button  onClick={this.speakInUS.bind(this)} size="lg" className="disabled" variant="outline-primary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> US</Button>
+          </ButtonGroup>
+
         </nav>
       </div>
     )
