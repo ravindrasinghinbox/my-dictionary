@@ -255,7 +255,6 @@ class App extends React.Component {
           defination: meaning,
         }
       })
-      this.speak(word)
       this.speakDefination();
     } else {
       this.speak(word + ' not found!')
@@ -393,6 +392,7 @@ class App extends React.Component {
     return str;
   }
   speakDefination() {
+    this.speak(this.state.meaning.word)
     var meaning = this.state.meaning.defination;
     var note = '';
     for (var g in meaning) {
@@ -406,7 +406,7 @@ class App extends React.Component {
     }
     note += " आदि को निम्नलिखित रूपों में प्रयोग कर सकते है|";
     var text = `${this.state.meaning.word} ${note} `;
-    this.speakInHi(text)
+    this.speakInHi(text,false)
   }
   speakInUK() {
     this.speak(this.state.meaning.word, 'en-UK')
@@ -414,8 +414,8 @@ class App extends React.Component {
   speakInUS() {
     this.speak(this.state.meaning.word, 'en-US')
   }
-  speakInHi(text) {
-    this.speak(text, 'hi-IN')
+  speakInHi(text,clear = true) {
+    this.speak(text, 'hi-IN',clear)
   }
   speakInEn(text) {
     this.speak(text, 'en-IN')
