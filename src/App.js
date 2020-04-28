@@ -1,13 +1,14 @@
 import React from 'react'
-import { Button, Spinner, Badge, ListGroup, ButtonGroup } from 'react-bootstrap'
+import { Button, Badge, ListGroup, ButtonGroup } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faVolumeUp } from '@fortawesome/free-solid-svg-icons'
+import { faVolumeUp, faMicrophone } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css'
 const axios = require('axios')
 class App extends React.Component {
   state = {
     DICT: [],
+    DICT_LEVEL: { 1: 'Today', 2: 'Yesterday', 8: '1st Week', 15: '2nd Week', 30: 'Month' },
     DICT_HISTORY: [],
     meaning: {
       word: "",
@@ -15,6 +16,7 @@ class App extends React.Component {
       defination: {}
     },
     SpeechRecognition: undefined,
+    speechSynthesisUtterance: {},
     SpeechRecognitionEvent: undefined,
     speakLangAllowed: ['hi-IN', 'en-IN', 'en-US', 'en-UK'],
     grammar: undefined,
@@ -22,7 +24,6 @@ class App extends React.Component {
     recognition: undefined,
     interimResult: "",
     finalResult: "",
-    currentEvent: "end",
     events: {
       isStart: false
     }
@@ -76,9 +77,19 @@ class App extends React.Component {
     this.state.recognition.onstart = this.onStart
   }
 
+  initilizeSpeechSynthesisUtterance() {
+    var list = {};
+    for (var i = 0; i < this.state.speakLangAllowed.length; i++) {
+      var key = this.state.speakLangAllowed[i]
+      list[key] = new window.SpeechSynthesisUtterance("This is example of " + key)
+      list[key]['lang'] = key
+    }
+    this.setState({ speechSynthesisUtterance: list });
+  }
   componentDidMount() {
 
     this.loadDictionary()
+    this.initilizeSpeechSynthesisUtterance()
     this.loadDictionaryHistory()
   }
   /**
@@ -86,7 +97,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onStart(event) {
-    this.setState({ currentEvent: arguments[0].type })
     this.setState({
       events: {
         isStart: true
@@ -100,7 +110,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onNoMatch(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onnomatch')
   }
 
@@ -109,7 +118,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onSpeechStart(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onspeechstart')
   }
   /**
@@ -117,7 +125,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onSpeechEnd(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onspeechend')
   }
   /**
@@ -125,7 +132,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onSoundStart(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onsoundstart')
   }
   /**
@@ -133,7 +139,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onSoundEnd(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onsoundend')
   }
   /**
@@ -141,7 +146,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onMatch(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onnomatch')
   }
   /**
@@ -149,15 +153,13 @@ class App extends React.Component {
    * @param {event} event 
    */
   onError(event) {
-    this.setState({ currentEvent: arguments[0].type })
-    console.warn(new Date(), 'onerror')
+    console.warn(new Date(), 'onerror', event.error)
   }
   /**
    * On Audio Start
    * @param {event} event 
    */
   onAudioStart(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onaudiostart')
   }
 
@@ -166,7 +168,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onAudioEnd(event) {
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onaudioend')
   }
   /**
@@ -174,10 +175,11 @@ class App extends React.Component {
    * @param {event} event 
    */
   onEnd(event) {
-    this.setState((state) => {
-      state.events.isStart = false
+    this.setState({
+      events: {
+        isStart: false
+      }
     })
-    this.setState({ currentEvent: arguments[0].type })
     console.warn(new Date(), 'onend')
   }
   /**
@@ -185,7 +187,6 @@ class App extends React.Component {
    * @param {event} event 
    */
   onResult(event) {
-    this.setState({ currentEvent: arguments[0].type })
     var trans = event.results[event.results.length - 1]
 
     if (trans.isFinal) {
@@ -194,7 +195,13 @@ class App extends React.Component {
       console.log("%c Final: " + trans[0].transcript.trim(), "color:#ff0000")
     } else {
       // interim result
-      this.resultFilter(trans[0].transcript)
+      var interim_transcript = "";
+      for (var i = event.resultIndex; i < event.results.length; ++i) {
+        if (!event.results[i].isFinal) {
+          interim_transcript += event.results[i][0].transcript;
+        }
+      }
+      this.resultFilter(interim_transcript)
       console.log("%c Intrim: " + trans[0].transcript.trim(), "color:#0000ff")
     }
   }
@@ -211,11 +218,11 @@ class App extends React.Component {
         str = spellResult
       }
       this.setState({ finalResult: str, interimResult: '' })
+      // Not allow to twice speak
+      this.getLastWordMeaning(str)
     } else {
       this.setState({ interimResult: str })
     }
-    // Not allow to twice speak
-    this.getLastWordMeaning(str)
   }
   checkSpellout(str) {
     // first split by space
@@ -254,8 +261,9 @@ class App extends React.Component {
           predict: predictList,
           defination: meaning,
         }
+      }, () => {
+        this.speakDefination();
       })
-      this.speakDefination();
     } else {
       this.speak(word + ' not found!')
       console.log('Not found meaning of ', word)
@@ -289,10 +297,10 @@ class App extends React.Component {
    * Start listening
    */
   listen() {
-    if (['end', 'result', 'audioend', 'error'].includes(this.state.currentEvent)) {
+    if (!this.state.isStart) {
       this.state.recognition.start()
     } else {
-      console.log('Recognition already in on', this.state.currentEvent)
+      console.log('Recognition already started')
     }
   }
   stopListen() {
@@ -303,11 +311,11 @@ class App extends React.Component {
       window.speechSynthesis.cancel()
     }
     if (text) {
-      var speechSynthesisUtterance = new window.SpeechSynthesisUtterance(text)
-      if (this.state.speakLangAllowed.includes(lang)) {
-        speechSynthesisUtterance['lang'] = lang
+      var speechSynthesisUtterance = this.state.speechSynthesisUtterance[lang]
+      if (speechSynthesisUtterance) {
+        speechSynthesisUtterance['text'] = text
+        window.speechSynthesis.speak(speechSynthesisUtterance)
       }
-      window.speechSynthesis.speak(speechSynthesisUtterance)
     }
   }
   /**
@@ -343,6 +351,18 @@ class App extends React.Component {
     return result
   }
 
+  saveMeaning(obj) {
+    let key = 'DICT_HISTORY'
+    let data = this.getLocalData(key) || []
+    let meaning = obj.defination[Object.keys(obj.defination)[0]][0]
+    data.unshift({ date: this.getDateString(), word: obj.word, meaning: meaning })
+    this.setLocalData(key, data);
+  }
+
+  getDateString() {
+    var d = new Date()
+    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()
+  }
   /**
    * Set Local Data
    * 
@@ -356,31 +376,41 @@ class App extends React.Component {
    * Load Dictionary
    */
   loadDictionaryHistory() {
-    let data = [
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 },
-      { word: 'welcome', meaning: 'स्वीकार करना', hints: 0 }
-    ]
-    var list = [
-      data, data, data, data, data, data, data, data, data, data
-    ]
-    // data = this.getLocalData('DICT_HISTORY') || list
-    data = list
-    if (data) {
-      this.setState({ DICT_HISTORY: data })
+    // let data = [
+    //   { date: "2020-04-28 12:00:11", word: 'welcome', meaning: 'स्वीकार करना 1' },
+    //   { date: "2020-04-27 12:00:13", word: 'welcome', meaning: 'स्वीकार करना 2' },
+    //   { date: "2020-04-20 12:00:14", word: 'welcome', meaning: 'स्वीकार करना 7' },
+    //   { date: "2020-04-14 12:00:14", word: 'welcome', meaning: 'स्वीकार करना 15' },
+    //   { date: "2020-04-01 12:00:15", word: 'welcome', meaning: 'स्वीकार करना 30' },
+    //   { date: "2020-03-05 12:00:16", word: 'welcome', meaning: 'स्वीकार करना 30+' }
+    // ]
+    let data = this.getLocalData('DICT_HISTORY') || []
+
+    let history = {}
+    var level = Object.keys(this.state.DICT_LEVEL).sort((a, b) => { return b - a });
+    var day = 0
+
+    // fill data in group
+    for (var index in data) {
+      day = this.getYearDay(data[index].date);
+
+      for (var i in level) {
+        if (day >= parseInt(level[i])) {
+          // create array if not avaialbe
+          if (typeof (history[level[i]]) === 'undefined') history[level[i]] = []
+          history[level[i]].push(data[index]);
+          break;
+        }
+      }
     }
+    this.setState({ DICT_HISTORY: history })
   }
 
+  getYearDay(date = '') {
+    var now = new Date()
+    var old = new Date(date)
+    return parseInt((now - old) / 86400000) + 1
+  }
   /**
    * Suffle word
    * 
@@ -394,19 +424,20 @@ class App extends React.Component {
   speakDefination() {
     this.speak(this.state.meaning.word)
     var meaning = this.state.meaning.defination;
+    this.saveMeaning(this.state.meaning)
     var note = '';
     for (var g in meaning) {
-      note += `${g}|`;
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 5; i++) {
         var word = meaning[g][i]
         if (word && word.trim()) {
-          note += `${meaning[g][i]},`
+          note += `|||${meaning[g][i]}`
         }
       }
+      break;
     }
-    note += " आदि को निम्नलिखित रूपों में प्रयोग कर सकते है|";
+    note += ` आदि ${g} के रूप में प्रयोग किये जाते है|`;
     var text = `${this.state.meaning.word} ${note} `;
-    this.speakInHi(text,false)
+    this.speakInHi(text, false)
   }
   speakInUK() {
     this.speak(this.state.meaning.word, 'en-UK')
@@ -414,8 +445,8 @@ class App extends React.Component {
   speakInUS() {
     this.speak(this.state.meaning.word, 'en-US')
   }
-  speakInHi(text,clear = true) {
-    this.speak(text, 'hi-IN',clear)
+  speakInHi(text, clear = true) {
+    this.speak(text, 'hi-IN', clear)
   }
   speakInEn(text) {
     this.speak(text, 'en-IN')
@@ -424,23 +455,19 @@ class App extends React.Component {
     return (
       <div className="App">
         <section className="result">
-          {this.state.DICT_HISTORY.map((day, index) => (
-            <div key={index} className={`list ${this.state.meaning.word ? 'd-none' : ''}`}>
-              <div className="text-center">{index ? 'Day-' + index : 'Today'}</div>
+          {(this.state.meaning.word ? [] : Object.keys(this.state.DICT_HISTORY)).map((index) => (
+            <div key={index} className={`list`}>
+              <div className="text-center">{this.state.DICT_LEVEL[index]}</div>
               {
-                day.map((obj, i2) => (
-                  <ListGroup.Item key={i2}>
+                this.state.DICT_HISTORY[index].map((obj, index2) => (
+                  <ListGroup.Item key={index2}>
                     <div className="row">
                       <div className="col-10">{obj.meaning}</div>
-                      <div className="col-2 text-right"><Badge variant="light">?</Badge></div>
+                      <div className="col-2 text-right"><Badge  onClick={this.showMeaning.bind(this, obj.word)} variant="light" className="cur-pointer noselect">?</Badge></div>
                       <div className="col-10">
-                        {
-                          obj.word.split('').sort(() => (Math.random() - 0.5)).map((letter, i3) =>
-                            <Badge key={i3} variant="warning" className="mr-1">{letter}</Badge>
-                          )
-                        }
+                        <Badge onClick={this.speakInEn.bind(this,obj.word)} key={index2} variant="warning" className="mr-1 cur-pointer">{obj.word}</Badge>
                       </div>
-                      <div className="col-2 text-right ok-img"><Badge variant="danger"></Badge></div>
+                      <div className="col-2 text-right ok-img"></div>
                     </div>
                   </ListGroup.Item>
                 ))
@@ -474,18 +501,11 @@ class App extends React.Component {
             )}
           </div>
           <ButtonGroup size="lg" className="mb-2 m-auto">
-            <Button onClick={this.speakInUK.bind(this)} size="lg" className="disabled" variant="outline-primary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> UK</Button>
-            <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className={`listen-btn`} size="lg" variant="primary" >
-              <Spinner
-                as="span"
-                animation="grow"
-                size="sm"
-                variant="light"
-                role="status"
-                aria-hidden="true"
-              /> {this.state.events.isStart ? 'PAUSE' : 'LISTEN'}
+            <Button onClick={this.speakInUK.bind(this)} size="lg" className="disabled" variant="outline-secondary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> UK</Button>
+            <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className={`listen-btn`} size="lg" variant={this.state.events.isStart ? 'warning' : 'primary'} >
+              <FontAwesomeIcon icon={faMicrophone} size="xs"></FontAwesomeIcon> {this.state.events.isStart ? 'PAUSE' : 'LISTEN'}
             </Button>
-            <Button  onClick={this.speakInUS.bind(this)} size="lg" className="disabled" variant="outline-primary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> US</Button>
+            <Button onClick={this.speakInUS.bind(this)} size="lg" className="disabled" variant="outline-secondary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> US</Button>
           </ButtonGroup>
 
         </nav>
