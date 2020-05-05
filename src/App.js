@@ -1,13 +1,14 @@
 import React from 'react'
 import { Button, Badge, ListGroup, ButtonGroup } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faVolumeUp, faMicrophone } from '@fortawesome/free-solid-svg-icons'
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css'
 const axios = require('axios')
 class App extends React.Component {
   state = {
     DICT: [],
+    DICT_LANG: 'e2h',
     DICT_LEVEL: { 1: 'Today', 2: 'Yesterday', 8: '1st Week', 15: '2nd Week', 30: 'Month' },
     DICT_HISTORY: [],
     meaning: {
@@ -243,6 +244,10 @@ class App extends React.Component {
       this.showMeaning(word)
     }
   }
+
+  getDictWord(word) {
+    return this.state.DICT[this.state.DICT_LANG][word];
+  }
   /**
    * Show meaning or word
    * @param {strin} word any text
@@ -252,7 +257,7 @@ class App extends React.Component {
       console.log('Empty word passed ')
       return false
     }
-    var meaning = this.state.DICT[word]
+    var meaning = this.getDictWord(word)
     var predictList = this.predictWord(word);
     if (meaning) {
       this.setState({
@@ -275,9 +280,9 @@ class App extends React.Component {
     for (var i = 0; i < word.length; i++) {
       var firstPart = word.substring(0, i);
       var secondPart = word.substring(i, word.length);
-      var firstObj = this.state.DICT[firstPart];
-      var secondObj = this.state.DICT[secondPart];
-      if (firstObj || secondObj) {
+      var firstObj = this.getDictWord(firstPart);
+      var secondObj = this.getDictWord(secondPart);
+      if (firstObj && secondObj) {
         if (!i) {
           results[secondPart] = [secondObj[Object.keys(secondObj)[0][0]]]
         } else if (firstPart.length > secondPart.length ? firstObj : secondObj) {
@@ -296,12 +301,22 @@ class App extends React.Component {
   /**
    * Start listening
    */
-  listen() {
-    if (!this.state.isStart) {
-      this.state.recognition.start()
-    } else {
-      console.log('Recognition already started')
-    }
+  listen(lang = 'e2h') {
+    this.setState({ DICT_LANG: lang });
+    this.setState((state) => {
+      if (lang === 'h2e' && state.recognition.lang !== 'h2e') {
+        state.recognition.lang = 'hi-IN'
+      } else if (state.recognition.lang !== 'e2h') {
+        state.recognition.lang = 'en-IN'
+      }
+    }, () => {
+      if (!this.state.isStart) {
+        this.state.recognition.start()
+      } else {
+        console.log('Recognition already started')
+      }
+    })
+
   }
   stopListen() {
     this.state.recognition.stop()
@@ -322,11 +337,28 @@ class App extends React.Component {
    * Load Dictionary
    */
   loadDictionary() {
+    this.e2hDictionary()
+    this.h2eDictionary()
+  }
+
+  e2hDictionary() {
     let _this = this
-    axios.get('/dataset.json')
+    axios.get('/e2h.json')
       .then(function (res) {
-        _this.state.DICT = res.data
-        console.info('Found dictionary data')
+        _this.state.DICT['e2h'] = res.data
+        console.info('Found eh2 dictionary data')
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+  }
+
+  h2eDictionary() {
+    let _this = this
+    axios.get('/h2e.json')
+      .then(function (res) {
+        _this.state.DICT['h2e'] = res.data
+        console.info('Found h2e dictionary data')
       })
       .catch(function (error) {
         console.log(error)
@@ -463,9 +495,9 @@ class App extends React.Component {
                   <ListGroup.Item key={index2}>
                     <div className="row">
                       <div className="col-10">{obj.meaning}</div>
-                      <div className="col-2 text-right"><Badge  onClick={this.showMeaning.bind(this, obj.word)} variant="light" className="cur-pointer noselect">?</Badge></div>
+                      <div className="col-2 text-right"><Badge onClick={this.showMeaning.bind(this, obj.word)} variant="light" className="cur-pointer noselect">?</Badge></div>
                       <div className="col-10">
-                        <Badge onClick={this.speakInEn.bind(this,obj.word)} key={index2} variant="warning" className="mr-1 cur-pointer">{obj.word}</Badge>
+                        <Badge onClick={this.speakInEn.bind(this, obj.word)} key={index2} variant="warning" className="mr-1 cur-pointer">{obj.word}</Badge>
                       </div>
                       <div className="col-2 text-right ok-img"></div>
                     </div>
@@ -501,11 +533,12 @@ class App extends React.Component {
             )}
           </div>
           <ButtonGroup size="lg" className="mb-2 m-auto">
-            <Button onClick={this.speakInUK.bind(this)} size="lg" className="disabled" variant="outline-secondary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> UK</Button>
-            <Button onClick={this.state.events.isStart ? this.stopListen : this.listen} className={`listen-btn`} size="lg" variant={this.state.events.isStart ? 'warning' : 'primary'} >
-              <FontAwesomeIcon icon={faMicrophone} size="xs"></FontAwesomeIcon> {this.state.events.isStart ? 'PAUSE' : 'LISTEN'}
+            <Button disabled={this.state.events.isStart && this.state.DICT_LANG !== 'e2h' ? true : false} onClick={this.state.events.isStart ? this.stopListen : this.listen.bind(this, 'e2h')} className={`listen-btn`} size="lg" variant={this.state.events.isStart && this.state.DICT_LANG === 'e2h' ? 'warning' : 'primary'} >
+              <FontAwesomeIcon icon={faMicrophone} size="xs"></FontAwesomeIcon> ENGLISH
             </Button>
-            <Button onClick={this.speakInUS.bind(this)} size="lg" className="disabled" variant="outline-secondary"><FontAwesomeIcon icon={faVolumeUp} size="xs" /> US</Button>
+            <Button disabled={this.state.events.isStart && this.state.DICT_LANG !== 'h2e' ? true : false} onClick={this.state.events.isStart ? this.stopListen : this.listen.bind(this, 'h2e')} className={`listen-btn`} size="lg" variant={this.state.events.isStart && this.state.DICT_LANG === 'h2e' ? 'warning' : 'primary'} >
+              <FontAwesomeIcon icon={faMicrophone} size="xs"></FontAwesomeIcon> HINDI
+            </Button>
           </ButtonGroup>
 
         </nav>
