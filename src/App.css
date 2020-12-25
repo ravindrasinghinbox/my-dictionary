@@ -28,13 +28,14 @@ body {
 *::-webkit-scrollbar-thumb {
   background-color: rgb(185, 182, 182);
 }
-.noselect,.noselectAll {
+.noselect,
+.noselectAll {
   -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
 * {
@@ -109,7 +110,7 @@ select#voice-list:empty {
 }
 .fixed-bottom {
   padding: 4px !important;
-  height: 64px;
+  height: 148px;
   border-top: 5px solid white;
   background-color: whitesmoke !important;
 }
@@ -124,7 +125,6 @@ select#voice-list:empty {
 }
 .listen-btn {
   letter-spacing: 1px;
-  min-width: 120px !important;
 }
 .list .list-group-item {
   margin-bottom: 5px;
@@ -145,4 +145,20 @@ select#voice-list:empty {
 }
 .cur-pointer {
   cursor: pointer;
+}
+.keypad-container {
+  text-align: center;
+}
+.keypad {
+  text-align: center;
+  display: inline-block;
+}
+.keypad button {
+  margin: 2px;
+  border-radius: 5px;
+}
+.wordList button {
+  padding: 2px;
+  margin-right: 8px;
+  font-size: 10px;
 }

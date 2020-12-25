@@ -1,5 +1,14 @@
 import React from 'react'
-import { Button, Badge, ListGroup } from 'react-bootstrap'
+import {
+  Button,
+  Badge,
+  ListGroup,
+  Form,
+  Row,
+  Col,
+  Container,
+  FormControl
+} from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons'
 
@@ -9,10 +18,16 @@ class App extends React.Component {
   state = {
     DICT: [],
     DICT_LANG: 'e2h',
-    DICT_LEVEL: { 1: 'Today', 2: 'Yesterday', 8: '1st Week', 15: '2nd Week', 30: 'Month' },
+    DICT_LEVEL: {
+      1: 'Today',
+      2: 'Yesterday',
+      8: '1st Week',
+      15: '2nd Week',
+      30: 'Month'
+    },
     DICT_HISTORY: [],
     meaning: {
-      word: "",
+      word: '',
       predict: {},
       defination: {}
     },
@@ -23,17 +38,20 @@ class App extends React.Component {
     grammar: undefined,
     voiceList: undefined,
     recognition: undefined,
-    interimResult: "",
-    finalResult: "",
+    interimResult: '',
+    finalResult: '',
     events: {
       isStart: false
-    }
+    },
+    isEnglish: true
   }
-  constructor(props) {
+  constructor (props) {
     super(props)
 
-    this.state.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
-    this.state.SpeechRecognitionEvent = window.webkitSpeechRecognitionEvent || window.SpeechRecognitionEvent
+    this.state.SpeechRecognition =
+      window.webkitSpeechRecognition || window.SpeechRecognition
+    this.state.SpeechRecognitionEvent =
+      window.webkitSpeechRecognitionEvent || window.SpeechRecognitionEvent
     this.state.recognition = new this.state.SpeechRecognition()
     this.state.recognition.continuous = false
     this.state.recognition.interimResults = true
@@ -78,26 +96,27 @@ class App extends React.Component {
     this.state.recognition.onstart = this.onStart
   }
 
-  initilizeSpeechSynthesisUtterance() {
-    var list = {};
+  initilizeSpeechSynthesisUtterance () {
+    var list = {}
     for (var i = 0; i < this.state.speakLangAllowed.length; i++) {
       var key = this.state.speakLangAllowed[i]
-      list[key] = new window.SpeechSynthesisUtterance("This is example of " + key)
+      list[key] = new window.SpeechSynthesisUtterance(
+        'This is example of ' + key
+      )
       list[key]['lang'] = key
     }
-    this.setState({ speechSynthesisUtterance: list });
+    this.setState({ speechSynthesisUtterance: list })
   }
-  componentDidMount() {
-
+  componentDidMount () {
     this.loadDictionary()
     this.initilizeSpeechSynthesisUtterance()
     this.loadDictionaryHistory()
   }
   /**
    * On Start
-   * @param {event} event 
+   * @param {event} event
    */
-  onStart(event) {
+  onStart (event) {
     this.setState({
       events: {
         isStart: true
@@ -108,74 +127,74 @@ class App extends React.Component {
 
   /**
    * On No Match
-   * @param {event} event 
+   * @param {event} event
    */
-  onNoMatch(event) {
+  onNoMatch (event) {
     // console.warn(new Date(), 'onnomatch')
   }
 
   /**
    * On Speech Start
-   * @param {event} event 
+   * @param {event} event
    */
-  onSpeechStart(event) {
+  onSpeechStart (event) {
     // console.warn(new Date(), 'onspeechstart')
   }
   /**
    * On Speech End
-   * @param {event} event 
+   * @param {event} event
    */
-  onSpeechEnd(event) {
+  onSpeechEnd (event) {
     // console.warn(new Date(), 'onspeechend')
   }
   /**
    * On Sound Start
-   * @param {event} event 
+   * @param {event} event
    */
-  onSoundStart(event) {
+  onSoundStart (event) {
     // console.warn(new Date(), 'onsoundstart')
   }
   /**
    * On Sound End
-   * @param {event} event 
+   * @param {event} event
    */
-  onSoundEnd(event) {
+  onSoundEnd (event) {
     // console.warn(new Date(), 'onsoundend')
   }
   /**
    * On Match
-   * @param {event} event 
+   * @param {event} event
    */
-  onMatch(event) {
+  onMatch (event) {
     // console.warn(new Date(), 'onnomatch')
   }
   /**
    * On Error
-   * @param {event} event 
+   * @param {event} event
    */
-  onError(event) {
+  onError (event) {
     // console.warn(new Date(), 'onerror', event.error)
   }
   /**
    * On Audio Start
-   * @param {event} event 
+   * @param {event} event
    */
-  onAudioStart(event) {
+  onAudioStart (event) {
     // console.warn(new Date(), 'onaudiostart')
   }
 
   /**
    * On Audio End
-   * @param {event} event 
+   * @param {event} event
    */
-  onAudioEnd(event) {
+  onAudioEnd (event) {
     // console.warn(new Date(), 'onaudioend')
   }
   /**
    * On End
-   * @param {event} event 
+   * @param {event} event
    */
-  onEnd(event) {
+  onEnd (event) {
     this.setState({
       events: {
         isStart: false
@@ -185,9 +204,9 @@ class App extends React.Component {
   }
   /**
    * On Result
-   * @param {event} event 
+   * @param {event} event
    */
-  onResult(event) {
+  onResult (event) {
     var trans = event.results[event.results.length - 1]
 
     if (trans.isFinal) {
@@ -196,10 +215,10 @@ class App extends React.Component {
       // console.log("%c Final: " + trans[0].transcript.trim(), "color:#ff0000")
     } else {
       // interim result
-      var interim_transcript = "";
+      var interim_transcript = ''
       for (var i = event.resultIndex; i < event.results.length; ++i) {
         if (!event.results[i].isFinal) {
-          interim_transcript += event.results[i][0].transcript;
+          interim_transcript += event.results[i][0].transcript
         }
       }
       this.resultFilter(interim_transcript)
@@ -210,7 +229,7 @@ class App extends React.Component {
    * Result Filter
    * @param {string} str any text
    */
-  resultFilter(str, isFinal = false) {
+  resultFilter (str, isFinal = false) {
     str = str.trim()
     if (isFinal) {
       // convert alphabet into word if possible
@@ -225,40 +244,43 @@ class App extends React.Component {
       this.setState({ interimResult: str })
     }
   }
-  checkSpellout(str) {
+  checkSpellout (str) {
     // first split by space
-    str = str.split(' ');
-    var result = str.join('');
+    str = str.split(' ')
+    var result = str.join('')
     for (var i = 0; i < str.length; i++) {
       if (str[i].length !== 1) {
-        result = ""
-        break;
+        result = ''
+        break
       }
     }
     return result
   }
-  getLastWordMeaning(str) {
-    var word = str.split(' ').pop().toLocaleLowerCase()
+  getLastWordMeaning (str) {
+    var word = str
+      .split(' ')
+      .pop()
+      .toLocaleLowerCase()
     // Not allow to twice speak
     if (this.state.meaning.word !== word) {
       this.showMeaning(word)
     }
   }
 
-  getDictWord(word) {
-    return this.state.DICT[this.state.DICT_LANG][word];
+  getDictWord (word) {
+    return this.state.DICT[this.state.DICT_LANG][word]
   }
   /**
    * Show meaning or word
    * @param {strin} word any text
    */
-  showMeaning(word) {
+  showMeaning (word) {
     if (word === '') {
       // console.log('Empty word passed ')
       return false
     }
     var meaning = this.getDictWord(word)
-    var predictList = this.predictWord(word);
+    var predictList = this.predictWord(word)
 
     if (!meaning && Object.keys(predictList).length) {
       word = Object.keys(predictList)[0]
@@ -267,60 +289,63 @@ class App extends React.Component {
       // console.log('found alternative meaning of ', word)
     }
     if (meaning) {
-      this.setState({
-        meaning: {
-          word: word,
-          predict: predictList,
-          defination: meaning,
+      this.setState(
+        {
+          meaning: {
+            word: word,
+            predict: predictList,
+            defination: meaning
+          }
+        },
+        () => {
+          this.speakDefination()
         }
-      }, () => {
-        this.speakDefination();
-      })
+      )
     } else {
       this.speak(word + ' not found!')
       // console.log('Not found meaning of ', word)
     }
   }
 
-  predictWord(word) {
-    var results = {};
+  predictWord (word) {
+    var results = {}
     for (var i = 0; i < word.length; i++) {
-      var firstWord = word.substring(0, i);
-      var firstObj = this.getDictWord(firstWord);
+      var firstWord = word.substring(0, i)
+      var firstObj = this.getDictWord(firstWord)
       if (firstObj) {
         if (firstWord.length > 1) {
-          results[firstWord] = [
-            firstObj[Object.keys(firstObj)[0]][0]
-          ]
+          results[firstWord] = [firstObj[Object.keys(firstObj)[0]][0]]
         }
       }
     }
-    return results;
+    return results
   }
   /**
    * Start listening
    */
-  listen(lang = 'e2h') {
-    this.setState({ DICT_LANG: lang });
-    this.setState((state) => {
-      if (lang === 'h2e' && state.recognition.lang !== 'h2e') {
-        state.recognition.lang = 'hi-IN'
-      } else if (state.recognition.lang !== 'e2h') {
-        state.recognition.lang = 'en-IN'
+  listen (lang = 'e2h') {
+    this.setState({ DICT_LANG: lang })
+    this.setState(
+      state => {
+        if (lang === 'h2e' && state.recognition.lang !== 'h2e') {
+          state.recognition.lang = 'hi-IN'
+        } else if (state.recognition.lang !== 'e2h') {
+          state.recognition.lang = 'en-IN'
+        }
+      },
+      () => {
+        if (!this.state.isStart) {
+          this.state.recognition.start()
+        } else {
+          // console.log('Recognition already started')
+        }
       }
-    }, () => {
-      if (!this.state.isStart) {
-        this.state.recognition.start()
-      } else {
-        // console.log('Recognition already started')
-      }
-    })
-
+    )
   }
-  stopListen() {
+  stopListen () {
     this.state.recognition.stop()
   }
-  speak(text, lang = 'en-IN', clear = true) {
+  speak (text, lang = 'en-IN', clear = true) {
     if (clear) {
       window.speechSynthesis.cancel()
     }
@@ -335,14 +360,15 @@ class App extends React.Component {
   /**
    * Load Dictionary
    */
-  loadDictionary() {
+  loadDictionary () {
     this.e2hDictionary()
     this.h2eDictionary()
   }
 
-  e2hDictionary() {
+  e2hDictionary () {
     let _this = this
-    axios.get('/e2h.json')
+    axios
+      .get('/e2h.json')
       .then(function (res) {
         _this.state.DICT['e2h'] = res.data
         // console.info('Found eh2 dictionary data')
@@ -352,9 +378,10 @@ class App extends React.Component {
       })
   }
 
-  h2eDictionary() {
+  h2eDictionary () {
     let _this = this
-    axios.get('/h2e.json')
+    axios
+      .get('/h2e.json')
       .then(function (res) {
         _this.state.DICT['h2e'] = res.data
         // console.info('Found h2e dictionary data')
@@ -366,10 +393,10 @@ class App extends React.Component {
 
   /**
    * Get local data from localhost
-   * 
-   * @param {string} key 
+   *
+   * @param {string} key
    */
-  getLocalData(key) {
+  getLocalData (key) {
     var result = null
     var data = localStorage.getItem(key)
     try {
@@ -382,31 +409,47 @@ class App extends React.Component {
     return result
   }
 
-  saveMeaning(obj) {
+  saveMeaning (obj) {
     let key = 'DICT_HISTORY'
     let data = this.getLocalData(key) || []
     let meaning = obj.defination[Object.keys(obj.defination)[0]][0]
-    data.unshift({ date: this.getDateString(), word: obj.word, meaning: meaning })
-    this.setLocalData(key, data);
+    data.unshift({
+      date: this.getDateString(),
+      word: obj.word,
+      meaning: meaning
+    })
+    this.setLocalData(key, data)
   }
 
-  getDateString() {
+  getDateString () {
     var d = new Date()
-    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()
+    return (
+      d.getFullYear() +
+      '-' +
+      (d.getMonth() + 1) +
+      '-' +
+      d.getDate() +
+      ' ' +
+      d.getHours() +
+      ':' +
+      d.getMinutes() +
+      ':' +
+      d.getSeconds()
+    )
   }
   /**
    * Set Local Data
-   * 
-   * @param {string} key 
-   * @param {string} data 
+   *
+   * @param {string} key
+   * @param {string} data
    */
-  setLocalData(key, data) {
+  setLocalData (key, data) {
     localStorage.setItem(key, JSON.stringify(data))
   }
   /**
    * Load Dictionary
    */
-  loadDictionaryHistory() {
+  loadDictionaryHistory () {
     // let data = [
     //   { date: "2020-04-28 12:00:11", word: 'welcome', meaning: 'स्वीकार करना 1' },
     //   { date: "2020-04-27 12:00:13", word: 'welcome', meaning: 'स्वीकार करना 2' },
@@ -418,45 +461,47 @@ class App extends React.Component {
     let data = this.getLocalData('DICT_HISTORY') || []
 
     let history = {}
-    var level = Object.keys(this.state.DICT_LEVEL).sort((a, b) => { return b - a });
+    var level = Object.keys(this.state.DICT_LEVEL).sort((a, b) => {
+      return b - a
+    })
     var day = 0
 
     // fill data in group
     for (var index in data) {
-      day = this.getYearDay(data[index].date);
+      day = this.getYearDay(data[index].date)
 
       for (var i in level) {
         if (day >= parseInt(level[i])) {
           // create array if not avaialbe
-          if (typeof (history[level[i]]) === 'undefined') history[level[i]] = []
-          history[level[i]].push(data[index]);
-          break;
+          if (typeof history[level[i]] === 'undefined') history[level[i]] = []
+          history[level[i]].push(data[index])
+          break
         }
       }
     }
     this.setState({ DICT_HISTORY: history })
   }
 
-  getYearDay(date = '') {
+  getYearDay (date = '') {
     var now = new Date()
     var old = new Date(date)
     return parseInt((now - old) / 86400000) + 1
   }
   /**
    * Suffle word
-   * 
-   * @param {string} str 
+   *
+   * @param {string} str
    */
-  suffle(str, join = true) {
-    str = str.split('').sort(() => (Math.random() - 0.5));
+  suffle (str, join = true) {
+    str = str.split('').sort(() => Math.random() - 0.5)
     if (join) str = str.join('')
-    return str;
+    return str
   }
-  speakDefination() {
+  speakDefination () {
     this.speak(this.state.meaning.word)
-    var meaning = this.state.meaning.defination;
+    var meaning = this.state.meaning.defination
     this.saveMeaning(this.state.meaning)
-    var note = '';
+    var note = ''
     for (var g in meaning) {
       for (var i = 0; i < 5; i++) {
         var word = meaning[g][i]
@@ -464,86 +509,218 @@ class App extends React.Component {
           note += `|||${meaning[g][i]}`
         }
       }
-      break;
+      break
     }
-    note += ` आदि ${g} के रूप में प्रयोग किये जाते है|`;
-    var text = `${this.state.meaning.word} ${note} `;
+    note += ` आदि ${g} के रूप में प्रयोग किये जाते है|`
+    var text = `${this.state.meaning.word} ${note} `
     this.speakInHi(text, false)
   }
-  speakInUK() {
+  speakInUK () {
     this.speak(this.state.meaning.word, 'en-UK')
   }
-  speakInUS() {
+  speakInUS () {
     this.speak(this.state.meaning.word, 'en-US')
   }
-  speakInHi(text, clear = true) {
+  speakInHi (text, clear = true) {
     this.speak(text, 'hi-IN', clear)
   }
-  speakInEn(text) {
+  speakInEn (text) {
     this.speak(text, 'en-IN')
   }
-  render() {
+  render () {
     return (
-      <div className="App">
-        <section className="result">
-          {(this.state.meaning.word ? [] : Object.keys(this.state.DICT_HISTORY)).map((index) => (
+      <div className='App'>
+        <section className='result'>
+          {(this.state.meaning.word
+            ? []
+            : Object.keys(this.state.DICT_HISTORY)
+          ).map(index => (
             <div key={index} className={`list`}>
-              <div className="text-center">{this.state.DICT_LEVEL[index]}</div>
-              {
-                this.state.DICT_HISTORY[index].map((obj, index2) => (
-                  <ListGroup.Item key={index2}>
-                    <div className="row">
-                      <div className="col-10">{obj.meaning}</div>
-                      <div className="col-2 text-right"><Badge onClick={this.showMeaning.bind(this, obj.word)} variant="light" className="cur-pointer noselect">?</Badge></div>
-                      <div className="col-10">
-                        <Badge onClick={this.speakInEn.bind(this, obj.word)} key={index2} variant="warning" className="mr-1 cur-pointer">{obj.word}</Badge>
-                      </div>
-                      <div className="col-2 text-right ok-img"></div>
+              <div className='text-center'>{this.state.DICT_LEVEL[index]}</div>
+              {this.state.DICT_HISTORY[index].map((obj, index2) => (
+                <ListGroup.Item key={index2}>
+                  <div className='row'>
+                    <div className='col-10'>{obj.meaning}</div>
+                    <div className='col-2 text-right'>
+                      <Badge
+                        onClick={this.showMeaning.bind(this, obj.word)}
+                        variant='light'
+                        className='cur-pointer noselect'
+                      >
+                        ?
+                      </Badge>
                     </div>
-                  </ListGroup.Item>
-                ))
-              }
+                    <div className='col-10'>
+                      <Badge
+                        onClick={this.speakInEn.bind(this, obj.word)}
+                        key={index2}
+                        variant='warning'
+                        className='mr-1 cur-pointer'
+                      >
+                        {obj.word}
+                      </Badge>
+                    </div>
+                    <div className='col-2 text-right ok-img'></div>
+                  </div>
+                </ListGroup.Item>
+              ))}
             </div>
           ))}
-          {Object.keys(this.state.meaning.defination).map((key, index) =>
-            <div key={index} className="list">
+          {Object.keys(this.state.meaning.defination).map((key, index) => (
+            <div key={index} className='list'>
               <span>{key}</span>
               <ul>
-                {Object.keys(this.state.meaning.defination[key]).map((key2, index2) =>
-                  <li key={index2}>{this.state.meaning.defination[key][key2]}</li>
+                {Object.keys(this.state.meaning.defination[key]).map(
+                  (key2, index2) => (
+                    <li key={index2}>
+                      {this.state.meaning.defination[key][key2]}
+                    </li>
+                  )
                 )}
               </ul>
             </div>
-          )}
+          ))}
         </section>
-        <nav className="navbar fixed-bottom">
-          <div className="wordList">
+        <nav className='navbar fixed-bottom'>
+          <div className='wordList'>
             {/* dictionary words */}
-            {Object.keys(this.state.meaning.predict).map((key, index) =>
-              <Badge key={index} onClick={this.speakInEn.bind(this, key)} className={`mr-1 btn btn-sm  btn-dark ${key ? '' : 'd-none'} ${this.state.meaning.word === key ? 'active' : ''}`}>{key + ' : ' + (this.state.meaning.predict[key])}</Badge>
-            )}
+            {Object.keys(this.state.meaning.predict).map((key, index) => (
+              <Badge
+                key={index}
+                onClick={this.speakInEn.bind(this, key)}
+                className={`mr-1 btn btn-sm  btn-dark ${key ? '' : 'd-none'} ${
+                  this.state.meaning.word === key ? 'active' : ''
+                }`}
+              >
+                {key + ' : ' + this.state.meaning.predict[key]}
+              </Badge>
+            ))}
             {/* final words */}
-            {this.state.finalResult.split(' ').map((key, index) =>
-              <Badge key={index} onClick={this.showMeaning.bind(this, key)} className={`mr-1 btn btn-sm btn-warning ${key ? '' : 'd-none'}`}>{key}</Badge>
-            )}
+            {this.state.finalResult.split(' ').map((key, index) => (
+              <Badge
+                key={index}
+                onClick={this.showMeaning.bind(this, key)}
+                className={`mr-1 btn btn-sm btn-warning ${key ? '' : 'd-none'}`}
+              >
+                {key}
+              </Badge>
+            ))}
             {/* intrim words */}
-            {this.state.interimResult.split(' ').map((key, index) =>
-              <Badge key={index} onClick={this.showMeaning.bind(this, key)} className={`mr-1 btn btn-sm btn-outline-warning ${key ? '' : 'd-none'}`}>{key}</Badge>
-            )}
+            {this.state.interimResult.split(' ').map((key, index) => (
+              <Badge
+                key={index}
+                onClick={this.showMeaning.bind(this, key)}
+                className={`mr-1 btn btn-sm btn-outline-warning ${
+                  key ? '' : 'd-none'
+                }`}
+              >
+                {key}
+              </Badge>
+            ))}
           </div>
-          <div size="lg" className="mb-2 m-auto">
-            <Button disabled={this.state.events.isStart && this.state.DICT_LANG !== 'e2h' ? true : false} onClick={this.state.events.isStart ? this.stopListen : this.listen.bind(this, 'e2h')} className={`listen-btn`} size="lg" variant={this.state.events.isStart && this.state.DICT_LANG === 'e2h' ? 'warning' : 'primary'} >
-              <FontAwesomeIcon icon={faMicrophone} size="xs"></FontAwesomeIcon> ENGLISH
-            </Button>&nbsp;
-            <Button disabled={this.state.events.isStart && this.state.DICT_LANG !== 'h2e' ? true : false} onClick={this.state.events.isStart ? this.stopListen : this.listen.bind(this, 'h2e')} className={`listen-btn`} size="lg" variant={this.state.events.isStart && this.state.DICT_LANG === 'h2e' ? 'warning' : 'primary'} >
-              <FontAwesomeIcon icon={faMicrophone} size="xs"></FontAwesomeIcon> HINDI
-            </Button>
-          </div>
-
+          <Container fluid className='p-0'>
+            <Col>
+              <div className='keypad-container'>
+                <div className='keypad'>
+                  <button className='key'>Q</button>
+                  <button className='key'>W</button>
+                  <button className='key'>E</button>
+                  <button className='key'>R</button>
+                  <button className='key'>T</button>
+                  <button className='key'>Y</button>
+                  <button className='key'>U</button>
+                  <button className='key'>I</button>
+                  <button className='key'>O</button>
+                  <button className='key'>P</button>
+                  <br />
+                  <button className='key'>A</button>
+                  <button className='key'>S</button>
+                  <button className='key'>D</button>
+                  <button className='key'>F</button>
+                  <button className='key'>G</button>
+                  <button className='key'>H</button>
+                  <button className='key'>J</button>
+                  <button className='key'>K</button>
+                  <button className='key'>L</button>
+                  <br />
+                  <button className='key' style={{ float: 'left' }}>
+                    &larr;
+                  </button>
+                  <button className='key'>Z</button>
+                  <button className='key'>X</button>
+                  <button className='key'>C</button>
+                  <button className='key'>V</button>
+                  <button className='key'>B</button>
+                  <button className='key'>N</button>
+                  <button className='key'>M</button>
+                  <button className='key' style={{ float: 'right' }}>
+                    &rarr;
+                  </button>
+                  <br />
+                  <Button
+                    style={{ float: 'left' }}
+                    disabled={
+                      this.state.events.isStart &&
+                      this.state.DICT_LANG !== 'h2e'
+                        ? true
+                        : false
+                    }
+                    onClick={
+                      this.state.events.isStart
+                        ? this.stopListen
+                        : this.listen.bind(this, 'h2e')
+                    }
+                    size="sm"
+                    variant={
+                      this.state.events.isStart &&
+                      this.state.DICT_LANG === 'h2e'
+                        ? 'warning'
+                        : 'secondary'
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faMicrophone}
+                      size='xs'
+                    ></FontAwesomeIcon>{' '}
+                    HIN
+                  </Button>
+                  <button className='key' style={{ width: '58%' }}>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  </button>
+                  <Button
+                    style={{ float: 'right' }}
+                    disabled={
+                      this.state.events.isStart &&
+                      this.state.DICT_LANG !== 'e2h'
+                        ? true
+                        : false
+                    }
+                    onClick={
+                      this.state.events.isStart
+                        ? this.stopListen
+                        : this.listen.bind(this, 'e2h')
+                    }
+                    size="sm"
+                    variant={
+                      this.state.events.isStart &&
+                      this.state.DICT_LANG === 'e2h'
+                        ? 'warning'
+                        : 'secondary'
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faMicrophone}
+                      size='xs'
+                    ></FontAwesomeIcon>{' '}
+                    ENG
+                  </Button>
+                </div>
+              </div>
+            </Col>
+          </Container>
         </nav>
       </div>
     )
   }
-
 }
 export default App
