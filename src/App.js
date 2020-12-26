@@ -31,6 +31,7 @@ class App extends React.Component {
     recognition: undefined,
     interimResult: '',
     finalResult: '',
+    typingText: '',
     events: {
       isStart: false
     },
@@ -49,6 +50,8 @@ class App extends React.Component {
 
     this.listen = this.listen.bind(this)
     this.stopListen = this.stopListen.bind(this)
+    this.keyPressed = this.keyPressed.bind(this)
+    this.keyCommand = this.keyCommand.bind(this)
 
     /**
      * Events
@@ -518,6 +521,27 @@ class App extends React.Component {
   speakInEn (text) {
     this.speak(text, 'en-IN')
   }
+  keyPressed (arg) {
+    console.log(arg)
+    this.setState({ typingText: this.state.typingText + arg })
+  }
+  keyCommand (arg) {
+    console.log('Command:', arg)
+    switch (arg) {
+      case 'DELETE': {
+        this.setState({ typingText: this.state.typingText.slice(0, -1) })
+        break
+      }
+      case 'ENTER': {
+        this.showMeaning(this.state.typingText.toLocaleLowerCase())
+        this.setState({ typingText: '' })
+        break
+      }
+      default: {
+        console.log('invalid input')
+      }
+    }
+  }
   render () {
     return (
       <div className='App'>
@@ -608,53 +632,196 @@ class App extends React.Component {
                 {key}
               </Badge>
             ))}
-
-            <Badge className={`mr-1 btn btn-sm btn-outline-primary`}>
-              Typing...
+            {/* Typing text goes here */}
+            <Badge className={`mr-1 typingText btn btn-sm btn-outline-primary`}>
+              {this.state.typingText
+                ? this.state.typingText
+                : this.state.meaning.word}
             </Badge>
           </div>
           <Container fluid className='p-0'>
             <Col className='p-0'>
               <div className='keypad-container'>
                 <div className='keypad'>
-                  <button className='key'>Q</button>
-                  <button className='key'>W</button>
-                  <button className='key'>E</button>
-                  <button className='key'>R</button>
-                  <button className='key'>T</button>
-                  <button className='key'>Y</button>
-                  <button className='key'>U</button>
-                  <button className='key'>I</button>
-                  <button className='key'>O</button>
-                  <button className='key'>P</button>
-                  <br />
-                  <button className='key'>A</button>
-                  <button className='key'>S</button>
-                  <button className='key'>D</button>
-                  <button className='key'>F</button>
-                  <button className='key'>G</button>
-                  <button className='key'>H</button>
-                  <button className='key'>J</button>
-                  <button className='key'>K</button>
-                  <button className='key'>L</button>
-                  <br />
-                  <button className='key' style={{ float: 'left' }}>
-                    &larr;
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'Q')}
+                  >
+                    Q
                   </button>
-                  <button className='key'>Z</button>
-                  <button className='key'>X</button>
-                  <button className='key'>C</button>
-                  <button className='key'>V</button>
-                  <button className='key'>B</button>
-                  <button className='key'>N</button>
-                  <button className='key'>M</button>
-                  <button className='key' style={{ float: 'right' }}>
-                    &rarr;
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'W')}
+                  >
+                    W
                   </button>
-                  <br />
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'E')}
+                  >
+                    E
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'R')}
+                  >
+                    R
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'T')}
+                  >
+                    T
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'Y')}
+                  >
+                    Y
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'U')}
+                  >
+                    U
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'I')}
+                  >
+                    I
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'O')}
+                  >
+                    O
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'P')}
+                  >
+                    P
+                  </button>
+                </div>
+                <div className='keypad line2'>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'A')}
+                  >
+                    A
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'S')}
+                  >
+                    S
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'D')}
+                  >
+                    D
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'F')}
+                  >
+                    F
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'G')}
+                  >
+                    G
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'H')}
+                  >
+                    H
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'J')}
+                  >
+                    J
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'K')}
+                  >
+                    K
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'L')}
+                  >
+                    L
+                  </button>
+                </div>
+                <div className='keypad'>
+                  <button
+                    className='key command'
+                    onClick={this.keyCommand.bind(this, 'DELETE')}
+                    style={{ float: 'left' }}
+                  >
+                    &#8678;
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'Z')}
+                  >
+                    Z
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'X')}
+                  >
+                    X
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'C')}
+                  >
+                    C
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'V')}
+                  >
+                    V
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'B')}
+                  >
+                    B
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'N')}
+                  >
+                    N
+                  </button>
+                  <button
+                    className='key'
+                    onClick={this.keyPressed.bind(this, 'M')}
+                  >
+                    M
+                  </button>
+                  <button
+                    className='key command'
+                    onClick={this.keyCommand.bind(this, 'ENTER')}
+                    style={{ float: 'right' }}
+                  >
+                    &#128270;
+                  </button>
+                </div>
+                <div className='keypad'>
                   <Button
                     className='listen-btn'
-                    style={{ float: 'left' }}
+                    style={{ float: 'left', maxWidth: '25%' }}
                     disabled={
                       this.state.events.isStart &&
                       this.state.DICT_LANG !== 'h2e'
@@ -682,13 +849,13 @@ class App extends React.Component {
                   </Button>
                   <button
                     className='key'
-                    style={{ width: 'calc(100% - 136px)' }}
+                    onClick={this.keyPressed.bind(this, ' ')}
                   >
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   </button>
                   <Button
                     className='listen-btn'
-                    style={{ float: 'right' }}
+                    style={{ float: 'right', maxWidth: '25%' }}
                     disabled={
                       this.state.events.isStart &&
                       this.state.DICT_LANG !== 'e2h'
