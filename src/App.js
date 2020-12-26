@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Button,
-  Badge,
-  ListGroup,
-  Col,
-  Container
-} from 'react-bootstrap'
+import { Button, Badge, ListGroup, Col, Container } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons'
 
@@ -614,9 +608,13 @@ class App extends React.Component {
                 {key}
               </Badge>
             ))}
+
+            <Badge className={`mr-1 btn btn-sm btn-outline-primary`}>
+              Typing...
+            </Badge>
           </div>
           <Container fluid className='p-0'>
-            <Col className="p-0">
+            <Col className='p-0'>
               <div className='keypad-container'>
                 <div className='keypad'>
                   <button className='key'>Q</button>
@@ -655,6 +653,7 @@ class App extends React.Component {
                   </button>
                   <br />
                   <Button
+                    className='listen-btn'
                     style={{ float: 'left' }}
                     disabled={
                       this.state.events.isStart &&
@@ -667,7 +666,7 @@ class App extends React.Component {
                         ? this.stopListen
                         : this.listen.bind(this, 'h2e')
                     }
-                    size="sm"
+                    size='sm'
                     variant={
                       this.state.events.isStart &&
                       this.state.DICT_LANG === 'h2e'
@@ -681,10 +680,14 @@ class App extends React.Component {
                     ></FontAwesomeIcon>{' '}
                     HIN
                   </Button>
-                  <button className='key' style={{ width: '58%' }}>
+                  <button
+                    className='key'
+                    style={{ width: 'calc(100% - 136px)' }}
+                  >
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   </button>
                   <Button
+                    className='listen-btn'
                     style={{ float: 'right' }}
                     disabled={
                       this.state.events.isStart &&
@@ -697,7 +700,7 @@ class App extends React.Component {
                         ? this.stopListen
                         : this.listen.bind(this, 'e2h')
                     }
-                    size="sm"
+                    size='sm'
                     variant={
                       this.state.events.isStart &&
                       this.state.DICT_LANG === 'e2h'

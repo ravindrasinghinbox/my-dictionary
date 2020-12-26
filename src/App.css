@@ -110,7 +110,7 @@ select#voice-list:empty {
 }
 .fixed-bottom {
   padding: 4px !important;
-  height: 148px;
+  height: 160x;
   border-top: 5px solid white;
   background-color: whitesmoke !important;
 }
@@ -125,6 +125,7 @@ select#voice-list:empty {
 }
 .listen-btn {
   letter-spacing: 1px;
+  width: 61px;
 }
 .list .list-group-item {
   margin-bottom: 5px;
@@ -154,9 +155,10 @@ select#voice-list:empty {
   display: inline-block;
 }
 .keypad button {
-  margin: 2px;
+  margin: 4px 2px;
   border-radius: 5px;
   min-width: 26px;
+  outline: none !important;
 }
 .wordList button {
   padding: 2px;
