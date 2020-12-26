@@ -3,11 +3,8 @@ import {
   Button,
   Badge,
   ListGroup,
-  Form,
-  Row,
   Col,
-  Container,
-  FormControl
+  Container
 } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons'
@@ -619,7 +616,7 @@ class App extends React.Component {
             ))}
           </div>
           <Container fluid className='p-0'>
-            <Col>
+            <Col className="p-0">
               <div className='keypad-container'>
                 <div className='keypad'>
                   <button className='key'>Q</button>

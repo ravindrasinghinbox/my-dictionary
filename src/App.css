@@ -8,7 +8,7 @@ html {
   height: 100%;
 }
 body {
-  padding-bottom: 64px;
+  padding-bottom: 142px;
   margin: 0;
   height: inherit;
 }
@@ -156,6 +156,7 @@ select#voice-list:empty {
 .keypad button {
   margin: 2px;
   border-radius: 5px;
+  min-width: 26px;
 }
 .wordList button {
   padding: 2px;
