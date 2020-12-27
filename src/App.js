@@ -545,7 +545,6 @@ class App extends React.Component {
   render () {
     return (
       <div className='App'>
-        <input type="text" style={{ width: '100%' }}/>
         <section className='result'>
           {(this.state.meaning.word
             ? []
