@@ -551,7 +551,7 @@ class App extends React.Component {
             : Object.keys(this.state.DICT_HISTORY)
           ).map(index => (
             <div key={index} className={`list`}>
-              <div className='text-center'>{this.state.DICT_LEVEL[index]}</div>
+              <div className='text-center list-heading'>{this.state.DICT_LEVEL[index]}</div>
               {this.state.DICT_HISTORY[index].map((obj, index2) => (
                 <ListGroup.Item key={index2}>
                   <div className='row'>
@@ -583,7 +583,7 @@ class App extends React.Component {
           ))}
           {Object.keys(this.state.meaning.defination).map((key, index) => (
             <div key={index} className='list'>
-              <span>{key}</span>
+              <p className="list-heading">{key}</p>
               <ul>
                 {Object.keys(this.state.meaning.defination[key]).map(
                   (key2, index2) => (
@@ -633,7 +633,11 @@ class App extends React.Component {
               </Badge>
             ))}
             {/* Typing text goes here */}
-            <Badge className={`mr-1 typingText btn btn-sm btn-outline-primary`}>
+            <Badge className={`mr-1 typingText btn btn-sm btn-${this.state.typingText
+                ? 'outline-primary'
+                : 'primary'}`}
+            onClick={this.showMeaning.bind(this, this.state.meaning.word)}
+            >
               {this.state.typingText
                 ? this.state.typingText
                 : this.state.meaning.word}
@@ -821,7 +825,7 @@ class App extends React.Component {
                 <div className='keypad'>
                   <Button
                     className='listen-btn'
-                    style={{ float: 'left', maxWidth: '25%' }}
+                    style={{ float: 'left', maxWidth: '25%', fontWeight: 100 }}
                     disabled={
                       this.state.events.isStart &&
                       this.state.DICT_LANG !== 'h2e'
@@ -855,7 +859,7 @@ class App extends React.Component {
                   </button>
                   <Button
                     className='listen-btn'
-                    style={{ float: 'right', maxWidth: '25%' }}
+                    style={{ float: 'right', maxWidth: '25%', fontWeight: 100 }}
                     disabled={
                       this.state.events.isStart &&
                       this.state.DICT_LANG !== 'e2h'

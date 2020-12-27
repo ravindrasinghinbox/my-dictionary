@@ -8,7 +8,7 @@ html {
   height: 100%;
 }
 body {
-  padding-bottom: 142px;
+  padding-bottom: 200px;
   margin: 0;
   height: inherit;
 }
@@ -109,10 +109,9 @@ select#voice-list:empty {
   display: none;
 }
 .fixed-bottom {
-  padding: 4px !important;
-  height: 160x;
   border-top: 5px solid white;
   background-color: whitesmoke !important;
+  background: radial-gradient(#d5d8de, transparent);
 }
 .wordList {
   position: absolute;
@@ -196,4 +195,10 @@ select#voice-list:empty {
 }
 .typingText {
   text-transform: capitalize !important;
+}
+.wordList .badge{
+  text-transform: capitalize;
+}
+.list-heading{
+  background: radial-gradient(#e2e2e2, transparent);
 }
