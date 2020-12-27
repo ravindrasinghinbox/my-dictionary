@@ -545,6 +545,7 @@ class App extends React.Component {
   render () {
     return (
       <div className='App'>
+        <input type="text" style={{ width: '100%' }}/>
         <section className='result'>
           {(this.state.meaning.word
             ? []
@@ -596,7 +597,7 @@ class App extends React.Component {
             </div>
           ))}
         </section>
-        <nav className='navbar fixed-bottom'>
+        <nav className='navbar fixed-bottom p-0'>
           <div className='wordList'>
             {/* dictionary words */}
             {Object.keys(this.state.meaning.predict).map((key, index) => (
